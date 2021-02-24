@@ -14,14 +14,14 @@ MySQL InnoDB Cluster dockerized environment for testing purposes
 * MySQL router creates the cluster after all nodes are up (see mysqlrouter/docker-entrypoint.sh). The cluster is created only if cluster doesen't exist.
 
 ## Environment variables
-* MySQL Server (mysqlsh image)
+* MySQL Server (mysql-innodb-cluster image)
  * MYSQL_ROOT_PASSWORD: MySQL root password
  * GROUP_NAME: uuid of the grpup replication
  * BOOTSTRAP: if value is set, MySQL InnoDB Cluster is bootstrapped
  * MYSQL_USER: mysql user (optional)
  * MYSQL_PASSWORD: mysql user password (optional)
  * MYSQL_DATABASE: mysql database (optional)
-* MySQL Router (mysqlrouter image)
+* MySQL Router (mysql-innodb-cluster-router image)
  * MYSQL_ROOT_PASSWORD: mysql for the root user
  * MYSQL_HOST: mysql primary node
  * CLUSTERMEMBERS: number of members expected in cluster

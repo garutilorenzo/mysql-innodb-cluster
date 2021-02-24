@@ -2,7 +2,7 @@ version: '3.4'
 services:
   mysql_node01:
     hostname: mysql_node01
-    image: mysqlsh:8.0
+    image: garutilorenzo/mysql-innodb-cluster:5.7
     build:
      context: mysql/
      args:
@@ -31,7 +31,7 @@ services:
 
   mysql_node02:
     hostname: mysql_node02
-    image: mysqlsh:8.0
+    image: garutilorenzo/mysql-innodb-cluster:5.7
     build:
      context: mysql/
      args:
@@ -60,7 +60,7 @@ services:
 
   mysql_node03:
     hostname: mysql_node03
-    image: mysqlsh:8.0
+    image: garutilorenzo/mysql-innodb-cluster:5.7
     build:
      context: mysql/
      args:
@@ -89,7 +89,7 @@ services:
 
   router:
     hostname: router
-    image: mysqlrouter:8.0
+    image: garutilorenzo/mysql-innodb-cluster-router:8.0
     build:
      context: mysqlrouter/
      args:
