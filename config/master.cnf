@@ -12,12 +12,16 @@ enforce-gtid-consistency=true
 
 log-slave-updates
 log_bin                   = mysql-bin
+expire-logs-days          = 2
 
 default_storage_engine = InnoDB
+innodb_file_format     = Barracuda
 
 # replication
 
 report-host = mysql_node01
+master-info-repository = TABLE
+relay-log-info-repository = TABLE
 slave_net_timeout = 60
 
 skip-slave-start
@@ -30,7 +34,3 @@ transaction_write_set_extraction = XXHASH64
 
 auto_increment_increment = 1
 auto_increment_offset = 2
-
-binlog_transaction_dependency_tracking = WRITESET 
-slave_parallel_type = LOGICAL_CLOCK
-slave_preserve_commit_order = ON

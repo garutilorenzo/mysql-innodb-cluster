@@ -2,13 +2,12 @@ version: '3.4'
 services:
   mysql_node01:
     hostname: mysql_node01
-    image: mysqlsh:8.0
+    image: mysqlsh:5.7
     build:
      context: mysql/
      args:
        - http_proxy=$http_proxy
        - https_proxy=$http_proxy
-    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./config/master.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
       - type: volume
@@ -16,29 +15,26 @@ services:
         target: /var/lib/mysql/
         volume:
           nocopy: true
-    cap_add:
-      - SYS_NICE  # CAP_SYS_NICE
     networks:
        cluster:
           ipv4_address: 172.16.0.2
     environment:
        MYSQL_ROOT_PASSWORD: root
+       GROUP_NAME: C55153C1-1574-4972-BF06-7332D6AD46A7
        MYSQL_USER: test
        MYSQL_PASSWORD: P@ssw0rd
        MYSQL_DATABASE: db_test
-       GROUP_NAME: C55153C1-1574-4972-BF06-7332D6AD46A7
        BOOTSTRAP: 1
 
   mysql_node02:
     hostname: mysql_node02
-    image: mysqlsh:8.0
+    image: mysqlsh:5.7
     build:
      context: mysql/
      args:
        - http_proxy=$http_proxy
        - https_proxy=$http_proxy
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./config/replica.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
       - type: volume
@@ -46,8 +42,6 @@ services:
         target: /var/lib/mysql/
         volume:
           nocopy: true
-    cap_add:
-      - SYS_NICE  # CAP_SYS_NICE
     networks:
        cluster:
           ipv4_address: 172.16.0.3
@@ -60,14 +54,13 @@ services:
 
   mysql_node03:
     hostname: mysql_node03
-    image: mysqlsh:8.0
+    image: mysqlsh:5.7
     build:
      context: mysql/
      args:
        - http_proxy=$http_proxy
        - https_proxy=$http_proxy
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./config/replica-bis.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
       - type: volume
@@ -75,8 +68,6 @@ services:
         target: /var/lib/mysql/
         volume:
           nocopy: true
-    cap_add:
-      - SYS_NICE  # CAP_SYS_NICE
     networks:
        cluster:
           ipv4_address: 172.16.0.4
@@ -89,7 +80,7 @@ services:
 
   router:
     hostname: router
-    image: mysqlrouter:8.0
+    image: mysqlrouter:5.7
     build:
      context: mysqlrouter/
      args:

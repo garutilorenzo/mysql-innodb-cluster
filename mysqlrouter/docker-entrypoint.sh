@@ -27,20 +27,20 @@ _main() {
 	fi
 
 	if [ -z "$CLUSTERMEMBERS" ]; then
-			echo >&2 'error: You must specify a value for CLUSTERMEMBERS when setting up a router'
-			exit 1
+		echo >&2 'error: You must specify a value for CLUSTERMEMBERS when setting up a router'
+		exit 1
 	fi
 
 	if [ -z "$MYSQL_PORT" ]; then
 			MYSQL_PORT="3306"
-		fi
+	fi
 
 	if [ -z "$MYSQL_USER" ]; then
 			MYSQL_USER="root"
 	fi
 
 	if [ -z "$CLUSTER_NAME" ]; then
-			CLUSTER_NAME="testcluster"
+		CLUSTER_NAME="testcluster"
 	fi
 
 	until mysql --no-defaults -h "$MYSQL_HOST" -P"$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_ROOT_PASSWORD" -nsLNE -e 'exit'; do
@@ -71,24 +71,24 @@ _main() {
 	# We'll use the hostname as the router instance name
 	HOSTNAME=$(hostname)
 
-    HOSTPORT=$(mysql --no-defaults -h "$MYSQL_HOST" -P"$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_ROOT_PASSWORD" -nsLNE -e "select CONCAT(member_host, ':', member_port) as primary_host from performance_schema.replication_group_members where member_state='ONLINE' and member_id=(IF((select @grpm:=variable_value from performance_schema.global_status where variable_name='group_replication_primary_member') = '', member_id, @grpm)) limit 1" 2>/dev/null | grep -v '*')
+	HOSTPORT=$(mysql --no-defaults -h "$MYSQL_HOST" -P"$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_ROOT_PASSWORD" -nsLNE -e "select CONCAT(member_host, ':', member_port) as primary_host from performance_schema.replication_group_members where member_state='ONLINE' and member_id=(IF((select @grpm:=variable_value from performance_schema.global_status where variable_name='group_replication_primary_member') = '', member_id, @grpm)) limit 1" 2>/dev/null | grep -v '*')
 
 	set +e
 	metadata_exists=$(mysqlsh --uri="$MYSQL_USER"@"$MYSQL_HOST":"$MYSQL_PORT" -p"$MYSQL_ROOT_PASSWORD" --no-wizard --js -i -e "dba.getCluster( '${CLUSTER_NAME}' )" 2>&1 | grep "<Cluster:$CLUSTER_NAME>")
 	set -e
 
-    if [ -z "$metadata_exists" ]; then
-  		# Then let's create the innodb cluster metadata
-  		output=$(mysqlsh --uri="$MYSQL_USER"@"$HOSTPORT" -p"$MYSQL_ROOT_PASSWORD" --no-wizard --js -i -e "dba.createCluster('${CLUSTER_NAME}', {adoptFromGR: true})")
-  	fi
+	if [ -z "$metadata_exists" ]; then
+		# Then let's create the innodb cluster metadata
+		output=$(mysqlsh --uri="$MYSQL_USER"@"$HOSTPORT" -p"$MYSQL_ROOT_PASSWORD" --no-wizard --js -i -e "dba.createCluster('${CLUSTER_NAME}', {adoptFromGR: true})")
+	fi
 
-    output=$(echo "$MYSQL_ROOT_PASSWORD" | mysqlrouter --bootstrap="$MYSQL_USER"@"$HOSTPORT" --user=root --name "$HOSTNAME" --force)
+	output=$(echo "$MYSQL_ROOT_PASSWORD" | mysqlrouter --bootstrap="$MYSQL_USER"@"$HOSTPORT" --user=root --name "$HOSTNAME" --force)
 
-    if [ ! "$?" = "0" ]; then
-  		echo >&2 'error: could not bootstrap router:'
-  		echo >&2 "$output"
-  		exit 1
-  	fi
+	if [ ! "$?" = "0" ]; then
+		echo >&2 'error: could not bootstrap router:'
+		echo >&2 "$output"
+		exit 1
+	fi
   fi
   exec "$@"
 }

@@ -58,20 +58,9 @@ docker_process_init_files() {
 	local f
 	for f; do
 		case "$f" in
-			*.sh)
-				# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
-				# https://github.com/docker-library/postgres/pull/452
-				if [ -x "$f" ]; then
-					mysql_note "$0: running $f"
-					"$f"
-				else
-					mysql_note "$0: sourcing $f"
-					. "$f"
-				fi
-				;;
+			*.sh)     mysql_note "$0: running $f"; . "$f" ;;
 			*.sql)    mysql_note "$0: running $f"; docker_process_sql < "$f"; echo ;;
 			*.sql.gz) mysql_note "$0: running $f"; gunzip -c "$f" | docker_process_sql; echo ;;
-			*.sql.xz) mysql_note "$0: running $f"; xzcat "$f" | docker_process_sql; echo ;;
 			*)        mysql_warn "$0: ignoring $f" ;;
 		esac
 		echo
@@ -102,7 +91,7 @@ docker_temp_server_start() {
 		mysql_note "Waiting for server startup"
 		local i
 		for i in {30..0}; do
-			# only use the root password if the database has already been initialized
+			# only use the root password if the database has already been initializaed
 			# so that it won't try to fill in a password file when it hasn't been set yet
 			extraArgs=()
 			if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
@@ -208,7 +197,7 @@ docker_process_sql() {
 		set -- --database="$MYSQL_DATABASE" "$@"
 	fi
 
-	mysql --defaults-extra-file=<( _mysql_passfile "${passfileArgs[@]}") --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" --comments "$@"
+	mysql --defaults-file=<( _mysql_passfile "${passfileArgs[@]}") --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" "$@"
 }
 
 # Initializes database with timezone info and root password, plus optional extra db/user
@@ -271,32 +260,12 @@ docker_setup_db() {
 		${rootCreate}
 		DROP DATABASE IF EXISTS test ;
 	EOSQL
-
-	
-}
-
-create_user() {
-	# Creates a custom database and user if specified
-	if [ -n "$MYSQL_DATABASE" ]; then
-		mysql_note "Creating database ${MYSQL_DATABASE}"
-		docker_process_sql --database=mysql <<<"CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;"
-	fi
-
-	if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
-		mysql_note "Creating user ${MYSQL_USER}"
-		docker_process_sql --database=mysql <<<"CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;"
-
-		if [ -n "$MYSQL_DATABASE" ]; then
-			mysql_note "Giving user ${MYSQL_USER} access to schema ${MYSQL_DATABASE}"
-			docker_process_sql --database=mysql <<<"GRANT ALL ON \`${MYSQL_DATABASE//_/\\_}\`.* TO '$MYSQL_USER'@'%' ;"
-		fi
-	fi
 }
 
 _mysql_passfile() {
 	# echo the password to the "file" the client uses
 	# the client command will use process substitution to create a file on the fly
-	# ie: --defaults-extra-file=<( _mysql_passfile )
+	# ie: --defaults-file=<( _mysql_passfile )
 	if [ '--dont-use-mysql-root-password' != "$1" ] && [ -n "$MYSQL_ROOT_PASSWORD" ]; then
 		cat <<-EOF
 			[client]
@@ -318,7 +287,7 @@ mysql_expire_root_user() {
 setup_gr_args() {
 	if [ -z "$BOOTSTRAP" -a -z "$GROUP_NAME" ]; then
 		echo >&2 'error: You must either use BOOTSTRAP=1 to start a new cluster--where a new group name UUID will be generated--or you must specify a valid UUID for the GROUP_NAME that you wish to join'
-		exit 1
+					exit 1
 	fi
 
 	# Get config
@@ -350,8 +319,8 @@ setup_gr_args() {
 		fi
 	elif [ -z "$GROUP_SEEDS" ]; then
 		echo >&2 'error: You must specify at least one valid IP/hostname:PORT URI value for GROUP_SEEDS in order to join an existing cluster'
-		exit 1
-	else
+					exit 1
+				else
 		echo >&1 "info: attempting to join the $GROUP_NAME group using $GROUP_SEEDS as seeds"
 	fi
 
@@ -374,6 +343,24 @@ change_master() {
 	docker_process_sql --database=mysql <<-EOSQL
 		CHANGE MASTER TO MASTER_USER='root', MASTER_PASSWORD='$MYSQL_ROOT_PASSWORD' FOR CHANNEL 'group_replication_recovery' ;
 	EOSQL
+}
+
+create_user() {
+	# Creates a custom database and user if specified
+	if [ -n "$MYSQL_DATABASE" ]; then
+		mysql_note "Creating database ${MYSQL_DATABASE}"
+		docker_process_sql --database=mysql <<<"CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;"
+	fi
+
+	if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+		mysql_note "Creating user ${MYSQL_USER}"
+		docker_process_sql --database=mysql <<<"CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;"
+
+		if [ -n "$MYSQL_DATABASE" ]; then
+			mysql_note "Giving user ${MYSQL_USER} access to schema ${MYSQL_DATABASE}"
+			docker_process_sql --database=mysql <<<"GRANT ALL ON \`${MYSQL_DATABASE//_/\\_}\`.* TO '$MYSQL_USER'@'%' ;"
+		fi
+	fi
 }
 
 # check arguments for an option that would cause mysqld to stop
@@ -418,10 +405,6 @@ _main() {
 		# there's no database, so it needs to be initialized
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
-
-			# check dir permissions to reduce likelihood of half-initialized database
-			ls /docker-entrypoint-initdb.d/ > /dev/null
-
 			docker_init_database_dir "$@"
 
 			mysql_note "Starting temporary server"
@@ -429,12 +412,13 @@ _main() {
 			mysql_note "Temporary server started."
 
 			docker_setup_db
+
 			docker_process_init_files /docker-entrypoint-initdb.d/*
 
 			mysql_expire_root_user
-			
+
 			change_master "$@"
-			
+
 			create_user
 
 			mysql_note "Stopping temporary server"

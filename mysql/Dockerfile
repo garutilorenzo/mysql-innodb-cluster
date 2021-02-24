@@ -47,8 +47,8 @@ RUN set -ex; \
 	rm -rf "$GNUPGHOME"; \
 	apt-key list > /dev/null
 
-ENV MYSQL_MAJOR 8.0
-ENV MYSQL_VERSION 8.0.23-1debian9
+ENV MYSQL_MAJOR 5.7
+ENV MYSQL_VERSION 5.7.32-1debian9
 
 RUN echo "deb http://repo.mysql.com/apt/debian/ stretch mysql-${MYSQL_MAJOR}" > /etc/apt/sources.list.d/mysql.list
 
@@ -60,7 +60,7 @@ RUN { \
 		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
 		echo mysql-community-server mysql-community-server/remove-test-db select false; \
 	} | debconf-set-selections \
-	&& apt-get update &&  DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get install -y mysql-community-server="${MYSQL_VERSION}" mysql-client="${MYSQL_VERSION}" mysql-community-client="${MYSQL_VERSION}"  mysql-server="${MYSQL_VERSION}" && rm -rf /var/lib/apt/lists/* \
+	&& apt-get update && apt-get install -y mysql-community-server="${MYSQL_VERSION}" mysql-client="${MYSQL_VERSION}" mysql-community-client="${MYSQL_VERSION}"  mysql-server="${MYSQL_VERSION}" && rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
 	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
 # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
@@ -74,7 +74,7 @@ RUN { \
 
 # MySQL shell
 
-ENV MYSQLSH_VERSION mysql-shell_8.0.23-1ubuntu20.04_amd64.deb 
+ENV MYSQLSH_VERSION mysql-shell_8.0.20-1ubuntu20.04_amd64.deb 
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true  apt-get install -y --no-install-recommends hostname tzdata libcurl4 libpython3.8 python3 wget\
@@ -86,7 +86,7 @@ RUN wget --no-check-certificate https://dev.mysql.com/get/Downloads/MySQL-Shell/
 
 VOLUME /var/lib/mysql
 
-COPY docker-entrypoint.sh /usr/local/bin/h
+COPY docker-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
