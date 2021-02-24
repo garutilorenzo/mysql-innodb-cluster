@@ -413,13 +413,13 @@ _main() {
 
 			docker_setup_db
 
-			docker_process_init_files /docker-entrypoint-initdb.d/*
-
 			mysql_expire_root_user
 
 			change_master "$@"
 
-			create_user
+			docker_process_init_files /docker-entrypoint-initdb.d/*
+
+			create_user	
 
 			mysql_note "Stopping temporary server"
 			docker_temp_server_stop
