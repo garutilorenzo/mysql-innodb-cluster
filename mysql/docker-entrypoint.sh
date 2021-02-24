@@ -429,12 +429,12 @@ _main() {
 			mysql_note "Temporary server started."
 
 			docker_setup_db
-			docker_process_init_files /docker-entrypoint-initdb.d/*
 
 			mysql_expire_root_user
 			
 			change_master "$@"
 			
+			docker_process_init_files /docker-entrypoint-initdb.d/*
 			create_user
 
 			mysql_note "Stopping temporary server"
