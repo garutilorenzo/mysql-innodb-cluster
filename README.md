@@ -15,24 +15,18 @@ MySQL InnoDB Cluster dockerized environment for testing purposes
 
 ## Environment variables
 * MySQL Server (mysql-innodb-cluster image)
- * MYSQL_ROOT_PASSWORD: MySQL root password
- * GROUP_NAME: uuid of the grpup replication
- * BOOTSTRAP: if value is set, MySQL InnoDB Cluster is bootstrapped
- * MYSQL_USER: mysql user (optional)
- * MYSQL_PASSWORD: mysql user password (optional)
- * MYSQL_DATABASE: mysql database (optional)
+  * MYSQL_ROOT_PASSWORD: MySQL root password
+  * GROUP_NAME: uuid of the grpup replication
+  * BOOTSTRAP: if value is set, MySQL InnoDB Cluster is bootstrapped
+  * MYSQL_USER: mysql user (optional)
+  * MYSQL_PASSWORD: mysql user password (optional)
+  * MYSQL_DATABASE: mysql database (optional)
 * MySQL Router (mysql-innodb-cluster-router image)
- * MYSQL_ROOT_PASSWORD: mysql for the root user
- * MYSQL_HOST: mysql primary node
- * CLUSTERMEMBERS: number of members expected in cluster
+  * MYSQL_ROOT_PASSWORD: mysql for the root user
+  * MYSQL_HOST: mysql primary node
+  * CLUSTERMEMBERS: number of members expected in cluster
 
 ## Spin up the cluster
-
-We have to build the images first with:
-
-```console
-docker-compose build
-```
 
 Start the cluster:
 
@@ -45,6 +39,12 @@ See if everything works correctrly:
 ```console
 docker-compose ps
 docker-compose logs -f
+```
+
+Build your own image, or build from scratch (Optional):
+
+```console
+docker-compose build
 ```
 
 ## Play with the cluster
