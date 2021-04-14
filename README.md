@@ -1,3 +1,11 @@
+[![MySQL InnoDB Cluster CI](https://github.com/garutilorenzo/mysql-innodb-cluster/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/garutilorenzo/mysql-innodb-cluster/actions/workflows/ci.yml)
+[![GitHub issues](https://img.shields.io/github/issues/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/issues)
+![GitHub](https://img.shields.io/github/license/garutilorenzo/mysql-innodb-cluster)
+[![GitHub forks](https://img.shields.io/github/forks/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/network)
+[![GitHub stars](https://img.shields.io/github/stars/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/stargazers)
+
+![MySQL Logo](https://garutilorenzo.github.io/images/mysql.png)
+
 # MySQL InnoDB Cluster
 
 MySQL InnoDB Cluster dockerized environment for testing purposes
