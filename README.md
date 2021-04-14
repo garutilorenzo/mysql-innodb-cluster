@@ -4,7 +4,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/network)
 [![GitHub stars](https://img.shields.io/github/stars/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/stargazers)
 
-![MySQL Logo](https://garutilorenzo.github.io/images/mysql.png)
+![MySQL Logo](https://garutilorenzo.github.io/images/mysql.png?)
 
 # MySQL InnoDB Cluster
 
