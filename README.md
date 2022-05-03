@@ -20,7 +20,7 @@ MySQL InnoDB Cluster dockerized environment for testing purposes
 
 * The master branch is based on MySQL 8.0, the 5.7 branch is based on MySQL 5.7 
 * MySQL InnoDB cluster is created on an existing group replication (see mysql/docker-entrypoint.sh for datails)
-* Unlike official MySQL docker image, user an database are created only on the first node and then propagated to other nodes. User an database are created after group repliation setup.
+* Unlike official MySQL docker image, user and database are created only on the first node and then propagated to other nodes. User and database are created after group repliation setup.
 * MySQL router creates the cluster after all nodes are up (see mysqlrouter/docker-entrypoint.sh). The cluster is created only if cluster doesen't exist.
 
 ## Environment variables
