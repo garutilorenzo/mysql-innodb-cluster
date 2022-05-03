@@ -1,9 +1,7 @@
 [mysqld]
 
-#skip-ssl
-
 server-id = 3
-port      = 3306
+port = 3306
 
 binlog_format = ROW
 
@@ -11,7 +9,7 @@ gtid_mode=ON
 enforce-gtid-consistency=true
 
 log-slave-updates
-log_bin                   = mysql-bin
+log_bin = mysql-bin
 
 default_storage_engine = InnoDB
 
