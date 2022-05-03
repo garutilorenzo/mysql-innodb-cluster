@@ -8,6 +8,10 @@ on:
     branches:
     - 5.7
 
+env:
+  CURRENT_MYSQL_VERSION: 5.7.38
+  CURRENT_MYSQL_MAYOR_VERSION: 5.7
+
 jobs:
 
   build:
@@ -17,9 +21,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build Docker images
-      run: docker-compose -f .docker-compose.yml-ci build --pull --no-cache
+      run: docker-compose -f docker-compose.yml build --pull --no-cache
     - name: Bringup the environment
-      run: docker-compose -f .docker-compose.yml-ci up -d
+      run: docker-compose -f docker-compose.yml up -d
     - name: Sleep for 30 seconds
       uses: jakejarvis/wait-action@master
       with:
@@ -27,6 +31,24 @@ jobs:
     - name: List all containers
       run: docker ps -a
     - name: Testing connection to MySQL Router
-      run: docker-compose -f .docker-compose.yml-ci exec -T router mysql -Aproot -h 127.0.0.1 --port 6446 db_test -e 'select 1;'
+      run: docker-compose -f docker-compose.yml exec -T router mysql -Aproot -h 127.0.0.1 --port 6446 db_test -e 'select 1;'
     - name: Get InnoDB cluster status
-      run: docker-compose -f .docker-compose.yml-ci exec -T mysql_node01 mysql -Aproot -h 127.0.0.1 -e 'select * from performance_schema.replication_group_members;'
+      run: docker-compose -f docker-compose.yml exec -T mysql_node01 mysql -Aproot -h 127.0.0.1 -e 'select * from performance_schema.replication_group_members;'
+    - name: docker push mysql-innodb-cluster image
+      run: |
+        IMAGE_ID=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:$CURRENT_MYSQL_VERSION
+        IMAGE_ID_MAYOR=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:$CURRENT_MYSQL_MAYOR_VERSION
+        echo IMAGE_ID=$IMAGE_ID
+        echo IMAGE_ID=$IMAGE_ID_MAYOR
+        docker tag $IMAGE_ID_MAYOR $IMAGE_ID
+        docker push $IMAGE_ID
+        docker push $IMAGE_ID_MAYOR
+    - name: docker push mysql-innodb-cluster-router image
+      run: |
+        ROUTER_IMAGE_ID=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:$CURRENT_MYSQL_VERSION
+        ROUTER_IMAGE_ID_MAYOR=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:$CURRENT_MYSQL_MAYOR_VERSION
+        echo ROUTER_IMAGE_ID=$ROUTER_IMAGE_ID
+        echo ROUTER_IMAGE_ID_MAYOR=$ROUTER_IMAGE_ID_MAYOR
+        docker tag $ROUTER_IMAGE_ID_MAYOR $ROUTER_IMAGE_ID
+        docker push $ROUTER_IMAGE_ID
+        docker push $ROUTER_IMAGE_ID_MAYOR

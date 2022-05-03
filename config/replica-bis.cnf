@@ -3,19 +3,19 @@
 #skip-ssl
 
 server-id = 3
-port      = 3306
+port = 3306
 
 binlog_format = ROW
 
 gtid_mode=ON
-enforce-gtid-consistency=true
+enforce-gtid-consistency = true
 
 log-slave-updates
-log_bin                   = mysql-bin
-expire-logs-days          = 2
+log_bin = mysql-bin
+expire-logs-days = 2
 
 default_storage_engine = InnoDB
-innodb_file_format     = Barracuda
+innodb_file_format = Barracuda
 
 # replication
 

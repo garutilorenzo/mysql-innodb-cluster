@@ -6,20 +6,26 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql
 RUN apt-get update && apt-get install -y --no-install-recommends gnupg dirmngr && rm -rf /var/lib/apt/lists/*
 
 # add gosu for easy step-down from root
-ENV GOSU_VERSION 1.7
-RUN set -x \
-	&& apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
-	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	#&& gpg --batch --keyserver-options "timeout=10 http-proxy=$http_proxy" --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --keyserver-options "timeout=10" --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-	&& gpgconf --kill all \
-	&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true \
-	&& apt-get purge -y --auto-remove ca-certificates wget
+ENV GOSU_VERSION 1.14
+RUN set -eux; \
+	savedAptMark="$(apt-mark showmanual)"; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends ca-certificates wget; \
+	rm -rf /var/lib/apt/lists/*; \
+	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
+	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	apt-mark auto '.*' > /dev/null; \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	chmod +x /usr/local/bin/gosu; \
+	gosu --version; \
+	gosu nobody true
 
 RUN mkdir /docker-entrypoint-initdb.d
 
@@ -34,23 +40,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Sys::Hostname
 # Data::Dumper
 		perl \
+		xz-utils \
+		zstd \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN set -ex; \
-# gpg: key 5072E1F5: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
-	key='A4A9406876FCBD3C456770C88C718D3B5072E1F5'; \
+RUN set -eux; \
+# gpg: key 3A79BD29: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
+	key='859BE8D7C586F538430B19C2467B942D3A79BD29'; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	#gpg --batch --keyserver-options "timeout=10 http-proxy=$http_proxy" --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	gpg --batch --keyserver-options "timeout=10" --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	gpg --batch --export "$key" > /etc/apt/trusted.gpg.d/mysql.gpg; \
+	gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	mkdir -p /etc/apt/keyrings; \
+	gpg --batch --export "$key" > /etc/apt/keyrings/mysql.gpg; \
 	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME"; \
-	apt-key list > /dev/null
+	rm -rf "$GNUPGHOME"
 
 ENV MYSQL_MAJOR 5.7
-ENV MYSQL_VERSION 5.7.33-1debian9
+ENV MYSQL_VERSION 5.7.38-1debian10
 
-RUN echo "deb http://repo.mysql.com/apt/debian/ stretch mysql-${MYSQL_MAJOR}" > /etc/apt/sources.list.d/mysql.list
+RUN echo 'deb [ signed-by=/etc/apt/keyrings/mysql.gpg ] http://repo.mysql.com/apt/debian/ buster mysql-5.7' > /etc/apt/sources.list.d/mysql.list
+
 
 # the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
 # also, we set debconf keys to make APT a little quieter
@@ -74,7 +82,7 @@ RUN { \
 
 # MySQL shell
 
-ENV MYSQLSH_VERSION mysql-shell_8.0.20-1ubuntu20.04_amd64.deb 
+ENV MYSQLSH_VERSION mysql-shell_8.0.29-1ubuntu20.04_amd64.deb
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true  apt-get install -y --no-install-recommends hostname tzdata libcurl4 libpython3.8 python3 wget\
