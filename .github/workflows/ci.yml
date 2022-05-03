@@ -57,8 +57,8 @@ jobs:
         ROUTER_IMAGE_ID_MAYOR=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:$CURRENT_MYSQL_MAYOR_VERSION
         echo ROUTER_IMAGE_ID=$ROUTER_IMAGE_ID
         echo ROUTER_IMAGE_ID_MAYOR=$ROUTER_IMAGE_ID_MAYOR
-        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $IMAGE_ID
-        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $IMAGE_ID_MAYOR
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $ROUTER_IMAGE_ID
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $ROUTER_IMAGE_ID_MAYOR
         docker push $ROUTER_IMAGE_ID
         docker push $ROUTER_IMAGE_ID_MAYOR
         docker push ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest
