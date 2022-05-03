@@ -8,6 +8,9 @@ on:
     branches:
     - master
 
+env:
+  CURRENT_MYSQL_VERSION: 8.0.29
+
 jobs:
 
   build:
@@ -17,9 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build Docker images
-      run: docker-compose -f .docker-compose.yml-ci build --pull --no-cache
+      run: docker-compose -f docker-compose.yml build --pull --no-cache
     - name: Bringup the environment
-      run: docker-compose -f .docker-compose.yml-ci up -d
+      run: docker-compose -f docker-compose.yml up -d
     - name: Sleep for 30 seconds
       uses: jakejarvis/wait-action@master
       with:
@@ -27,6 +30,19 @@ jobs:
     - name: List all containers
       run: docker ps -a
     - name: Testing connection to MySQL Router
-      run: docker-compose -f .docker-compose.yml-ci exec -T router mysql -Aproot -h 127.0.0.1 --port 6446 db_test -e 'select 1;'
+      run: docker-compose -f docker-compose.yml exec -T router mysql -Aproot -h 127.0.0.1 --port 6446 db_test -e 'select 1;'
     - name: Get InnoDB cluster status
-      run: docker-compose -f .docker-compose.yml-ci exec -T mysql_node01 mysql -Aproot -h 127.0.0.1 -e 'select * from performance_schema.replication_group_members;'
+      run: docker-compose -f docker-compose.yml exec -T mysql_node01 mysql -Aproot -h 127.0.0.1 -e 'select * from performance_schema.replication_group_members;'
+    - name: docker login
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: docker push mysql-innodb-cluster image
+      run: |
+        IMAGE_ID=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:$CURRENT_MYSQL_VERSION
+        echo IMAGE_ID=$IMAGE_ID
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:latest $IMAGE_ID
+        docker push $IMAGE_ID
+        docker push ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:latest
