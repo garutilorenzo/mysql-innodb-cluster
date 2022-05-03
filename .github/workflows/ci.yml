@@ -10,6 +10,7 @@ on:
 
 env:
   CURRENT_MYSQL_VERSION: 8.0.29
+  CURRENT_MYSQL_MAYOR_VERSION: 8
 
 jobs:
 
@@ -42,7 +43,22 @@ jobs:
     - name: docker push mysql-innodb-cluster image
       run: |
         IMAGE_ID=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:$CURRENT_MYSQL_VERSION
+        IMAGE_ID_MAYOR=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:$CURRENT_MYSQL_MAYOR_VERSION
         echo IMAGE_ID=$IMAGE_ID
+        echo IMAGE_ID=$IMAGE_ID_MAYOR
         docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:latest $IMAGE_ID
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:latest $IMAGE_ID_MAYOR
         docker push $IMAGE_ID
+        docker push $IMAGE_ID_MAYOR
         docker push ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster:latest
+    - name: docker push mysql-innodb-cluster-router image
+      run: |
+        ROUTER_IMAGE_ID=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:$CURRENT_MYSQL_VERSION
+        ROUTER_IMAGE_ID_MAYOR=${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:$CURRENT_MYSQL_MAYOR_VERSION
+        echo ROUTER_IMAGE_ID=$ROUTER_IMAGE_ID
+        echo ROUTER_IMAGE_ID_MAYOR=$ROUTER_IMAGE_ID_MAYOR
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $IMAGE_ID
+        docker tag ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest $IMAGE_ID_MAYOR
+        docker push $ROUTER_IMAGE_ID
+        docker push $ROUTER_IMAGE_ID_MAYOR
+        docker push ${{ secrets.DOCKER_USER }}/mysql-innodb-cluster-router:latest
