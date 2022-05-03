@@ -3,6 +3,8 @@
 ![GitHub](https://img.shields.io/github/license/garutilorenzo/mysql-innodb-cluster)
 [![GitHub forks](https://img.shields.io/github/forks/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/network)
 [![GitHub stars](https://img.shields.io/github/stars/garutilorenzo/mysql-innodb-cluster)](https://github.com/garutilorenzo/mysql-innodb-cluster/stargazers)
+[![Docker Stars](https://img.shields.io/docker/stars/garutilorenzo/docker-swarm-ingress?style=flat-square)](https://hub.docker.com/r/garutilorenzo/docker-swarm-ingress) 
+[![Docker Pulls](https://img.shields.io/docker/pulls/garutilorenzo/docker-swarm-ingress?style=flat-square)](https://hub.docker.com/r/garutilorenzo/docker-swarm-ingress)
 
 ![MySQL Logo](https://garutilorenzo.github.io/images/mysql.png?)
 
